@@ -1,6 +1,5 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { ToastProvider } from "../components/ToastProvider";
 
 export const metadata: Metadata = {
   title: "Vegetarian Challenge",
@@ -15,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ToastProvider>{children}</ToastProvider>
+        {children}
       </body>
     </html>
   );

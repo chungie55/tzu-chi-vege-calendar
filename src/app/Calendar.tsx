@@ -35,30 +35,15 @@ export default function Calendar() {
 
   // Countdown (days only)
   useEffect(() => {
-  const interval = setInterval(() => {
-    const now = new Date();
-
-    // Singapore time: UTC+8
-    const nowUTC = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
-    const nowSG = new Date(nowUTC.getTime() + 8 * 60 * 60000);
-
-    // Target: Dec 26, 2025 00:00 Singapore time
-    const targetSingapore = new Date(2025, 11, 26, 0, 0, 0);
-
-    // Zero out hours/minutes/seconds for days difference
-    const todaySG = new Date(
-      nowSG.getFullYear(),
-      nowSG.getMonth(),
-      nowSG.getDate()
-    );
-    const diffTime = targetSingapore.getTime() - todaySG.getTime();
-    const days = Math.max(Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1, 0);
-
-    setDaysLeft(days);
-  }, 1000 * 60 * 60); // update hourly
-
-  return () => clearInterval(interval);
-}, []);
+    const target = new Date("2025-12-26T00:00:00+08:00");
+    const update = () => {
+      const diff = target.getTime() - Date.now();
+      setDaysLeft(Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    };
+    update();
+    const timer = setInterval(update, 86400000); // update daily
+    return () => clearInterval(timer);
+  }, []);
 
 
   const toggleDate = async (date: string) => {
