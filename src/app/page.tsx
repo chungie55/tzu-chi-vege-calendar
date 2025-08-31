@@ -2,6 +2,7 @@
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../lib/firebaseClient";
 import Calendar from "./Calendar";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 export default function Page() {
   const [user, loading] = useAuthState(auth);
@@ -10,7 +11,7 @@ export default function Page() {
   if (!user)
     return (
       <button
-        onClick={() => auth.signInWithPopup(new auth.GoogleAuthProvider())}
+        onClick={() => signInWithPopup(auth, new GoogleAuthProvider())}
         className="px-4 py-2 bg-blue-600 text-white rounded-md"
       >
         Sign in with Google
