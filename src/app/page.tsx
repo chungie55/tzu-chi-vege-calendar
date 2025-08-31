@@ -18,5 +18,5 @@ export default function Page() {
       </button>
     );
 
-  return <Calendar user={user} />;
+  return <Calendar />;
 }
