@@ -2,7 +2,7 @@
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../lib/firebaseClient";
 import Calendar from "./Calendar";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
 export default function Page() {
   const [user, loading] = useAuthState(auth);
@@ -18,5 +18,17 @@ export default function Page() {
       </button>
     );
 
-  return <Calendar />;
+  return (
+    <div>
+      <div style={{ textAlign: "right", margin: "1rem 0" }}>
+        <button
+          onClick={() => signOut(auth)}
+          className="px-4 py-2 bg-gray-600 text-white rounded-md"
+        >
+          Logout
+        </button>
+      </div>
+      <Calendar />
+    </div>
+  );
 }
