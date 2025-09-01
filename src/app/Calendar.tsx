@@ -1,6 +1,5 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { db, auth } from "../lib/firebaseClient";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -24,10 +23,13 @@ export default function Calendar() {
   // Responsive: months per row
   const [monthsPerRow, setMonthsPerRow] = useState(2);
 
+  // Flip animation state
+  const [flipped, setFlipped] = useState(false);
+  const [prevDaysLeft, setPrevDaysLeft] = useState(daysLeft);
+
   useEffect(() => {
     function handleResize() {
       const width = Math.min(window.innerWidth, BANNER_MAX_WIDTH);
-      // If width < 600px, show 1 month per row, else 2
       setMonthsPerRow(width < 600 ? 1 : 2);
     }
     handleResize();
@@ -35,7 +37,6 @@ export default function Calendar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Load user data
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
@@ -48,7 +49,6 @@ export default function Calendar() {
     fetchData();
   }, [user]);
 
-  // Countdown (days only)
   useEffect(() => {
     const target = new Date("2025-12-26T00:00:00+08:00");
     const update = () => {
@@ -60,13 +60,21 @@ export default function Calendar() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (daysLeft !== prevDaysLeft) {
+      setFlipped(true);
+      setTimeout(() => {
+        setFlipped(false);
+        setPrevDaysLeft(daysLeft);
+      }, 600);
+    }
+  }, [daysLeft, prevDaysLeft]);
+
   const toggleDate = async (date: string) => {
     if (!user) return;
-
     const updated = markedDates.includes(date)
       ? markedDates.filter((d) => d !== date)
       : [...markedDates, date];
-
     setMarkedDates(updated);
     await setDoc(doc(db, "checkins", user.uid), { markedDates: updated }, { merge: true });
   };
@@ -80,20 +88,6 @@ export default function Calendar() {
   for (let i = 0; i < months.length; i += monthsPerRow) {
     rows.push(months.slice(i, i + monthsPerRow));
   }
-
-  // Flip animation state
-  const [flipped, setFlipped] = useState(false);
-  const [prevDaysLeft, setPrevDaysLeft] = useState(daysLeft);
-
-  useEffect(() => {
-    if (daysLeft !== prevDaysLeft) {
-      setFlipped(true);
-      setTimeout(() => {
-        setFlipped(false);
-        setPrevDaysLeft(daysLeft);
-      }, 600);
-    }
-  }, [daysLeft, prevDaysLeft]);
 
   return (
     <div
