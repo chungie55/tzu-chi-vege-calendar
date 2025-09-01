@@ -169,7 +169,7 @@ export default function Page() {
 
   // Show profile form if profile doesn't exist
   if (profileLoading) return <p>Loading profile...</p>;
-  if (user && !profile)
+  if (user && profile && !profile.uid)
     return (
       <div
         style={{
