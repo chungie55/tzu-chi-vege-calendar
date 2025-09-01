@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { db, auth } from "../../lib/firebaseClient";
-import { collection, getDocs, Timestamp } from "firebase/firestore";
+import { collection, getDocs, getDoc, doc, Timestamp } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Define a proper type for user profiles
 interface Profile {
@@ -17,32 +19,61 @@ interface Profile {
 }
 
 export default function Admin() {
+  const [user, loading] = useAuthState(auth);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [markedCounts, setMarkedCounts] = useState<Record<string, number>>({});
   const [sortKey, setSortKey] = useState<keyof Profile | "markedCount">("name");
   const [sortAsc, setSortAsc] = useState(true);
+  const router = useRouter();
 
+  // Fetch profile after login
   useEffect(() => {
-    // Fetch all profiles
-    const fetchProfiles = async () => {
-      const snap = await getDocs(collection(db, "profiles"));
-      const data: Profile[] = [];
-      snap.forEach(doc => {
-        data.push(doc.data() as Profile);
-      });
-      setProfiles(data);
+    if (!user) {
+      return;
+    }
 
-      // Fetch marked dates count for each user
-      const checkinSnap = await getDocs(collection(db, "checkins"));
-      const counts: Record<string, number> = {};
-      checkinSnap.forEach(doc => {
-        const d = doc.data();
-        counts[doc.id] = Array.isArray(d.markedDates) ? d.markedDates.length : 0;
-      });
-      setMarkedCounts(counts);
-    };
-    fetchProfiles();
-  }, []);
+    const ref = doc(db, "profiles", user.uid);
+    getDoc(ref)
+      .then((snap) => {
+        if (snap.exists() && snap.data().isAdmin) {
+          console.log("Admin access granted");
+          setIsAdmin(true);
+          // Fetch all profiles
+          const fetchProfiles = async () => {
+            const snap = await getDocs(collection(db, "profiles"));
+            const data: Profile[] = [];
+            snap.forEach(doc => {
+              data.push(doc.data() as Profile);
+            });
+            setProfiles(data);
+
+            // Fetch marked dates count for each user
+            const checkinSnap = await getDocs(collection(db, "checkins"));
+            const counts: Record<string, number> = {};
+            checkinSnap.forEach(doc => {
+              const d = doc.data();
+              counts[doc.id] = Array.isArray(d.markedDates) ? d.markedDates.length : 0;
+            });
+            setMarkedCounts(counts);
+          };
+          fetchProfiles();
+        } 
+      })
+  }, [user]);
+
+
+  if (loading) return <p>Loading...</p>;
+  if (!isAdmin) return <p>Access denied. Admins only.</p>;
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/"); // redirect to root
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   // Sorting logic
   const sortedProfiles = [...profiles].sort((a, b) => {
@@ -83,7 +114,7 @@ export default function Admin() {
           </button>
         </Link>
         <button
-          onClick={() => signOut(auth)}
+          onClick={handleLogout}
           className="px-4 py-2 bg-gray-600 text-white rounded-md"
         >
           Logout
