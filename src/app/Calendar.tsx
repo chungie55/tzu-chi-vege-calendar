@@ -97,24 +97,85 @@ export default function Calendar() {
         margin: "0 auto",
       }}
     >
-      {/* Progress Bar */}
-      <div className="progress-wrapper">
-        <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
+      {/* Dharma Assembly Info Box */}
+      <div
+        style={{
+          border: "1px solid #ccc",
+          borderRadius: "10px",
+          background: "transparent",
+          padding: "1rem",
+          marginBottom: "1.5rem",
+          fontSize: "1rem",
+          lineHeight: "1.7",
+        }}
+      >
+        <div style={{ marginBottom: "1rem" }}>
+          <strong>📍 法會前 Before the Dharma Assembly</strong>
+          <br />
+          發願：我願齋戒 108 天，以清淨身心，迎接《無量義經》經藏演繹。<br />
+          <span style={{ color: "#555" }}>
+            I vow to observe 108 days of fasting and self-discipline, purifying body and mind in preparation for the Dharma Assembly of the Infinite Meanings Sutra.
+          </span>
         </div>
-        <div className="progress-label">
-          {markedDates.length} / {totalDays} days completed
-        </div>        
+        <div style={{ marginBottom: "1rem" }}>
+          <strong>📍 法會中 During the Dharma Assembly</strong>
+          <br />
+          每日自我檢視表 Daily Self-Check<br />
+          請每日勾選，提醒自己持守齋戒，清淨心念。<br />
+          <span style={{ color: "#555" }}>
+            Check daily to reflect on your practice of fasting and maintaining purity.
+          </span>
+        </div>
+        <div>
+          <strong>📍 法會後 After the Dharma Assembly</strong>
+          <br />
+          迴向 Dedication of Merits<br />
+          願以此持戒清淨之力，廣度有情，社會祥和，天下無災。<br />
+          <span style={{ color: "#555" }}>
+            May the merits of this pure practice spread to all beings, bringing harmony to society and freedom from calamities throughout the world.
+          </span>
+        </div>
       </div>
 
-      {/* Flip Card Countdown */}
-      <div className={`flip-card${flipped ? " flipped" : ""}`}>
-        <div className="flip-card-inner">
-          <div className="flip-card-front">{prevDaysLeft}</div>
-          <div className="flip-card-back">{daysLeft}</div>
+      {/* Progress Bar Box */}
+      <div
+        style={{
+          border: "1px solid #ccc",
+          borderRadius: "10px",
+          background: "transparent",
+          padding: "1rem",
+          marginBottom: "1.5rem",
+        }}
+      >
+        <div className="progress-wrapper">
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
+          </div>
+          <div className="progress-label">
+            {markedDates.length} / {totalDays} days completed
+          </div>
         </div>
       </div>
-    <div className="flip-label">Days left until 26 Dec 2025</div>
+
+      {/* Countdown Flip Card Box */}
+      <div
+        style={{
+          border: "1px solid #ccc",
+          borderRadius: "10px",
+          background: "transparent",
+          padding: "1rem",
+          marginBottom: "1.5rem",
+          textAlign: "center",
+        }}
+      >
+        <div className={`flip-card${flipped ? " flipped" : ""}`}>
+          <div className="flip-card-inner">
+            <div className="flip-card-front">{prevDaysLeft}</div>
+            <div className="flip-card-back">{daysLeft}</div>
+          </div>
+        </div>
+        <div className="flip-label">Days left until 26 Dec 2025</div>
+      </div>
 
       {/* Dynamic month rows */}
       {rows.map((row, idx) => (
