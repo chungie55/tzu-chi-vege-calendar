@@ -1,11 +1,85 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../lib/firebaseClient";
 import Calendar from "./Calendar";
 import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
+import { db } from "../lib/firebaseClient";
+import Link from "next/link";
+
+const UNIT_OPTIONS = [
+  "妙音组",
+  "妙手组",
+  "戏剧组",
+  "护经藏团队",
+];
 
 export default function Page() {
   const [user, loading] = useAuthState(auth);
+  const [profile, setProfile] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [unit, setUnit] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch profile after login
+  useEffect(() => {
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+    setProfileLoading(true);
+    const ref = doc(db, "profiles", user.uid);
+    getDoc(ref)
+      .then((snap) => {
+        if (snap.exists()) {
+          setProfile(snap.data());
+        } else {
+          setProfile(null);
+        }
+      })
+      .finally(() => setProfileLoading(false));
+    
+    // Listen for live updates
+    const unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists()) {
+        setProfile(snap.data());
+      } else {
+        setProfile(null);
+      }
+    });
+
+    // Update last login timestamp
+    setDoc(ref, { lastLogin: serverTimestamp() }, { merge: true });
+
+    return () => unsub();
+  }, [user]);
+
+  // Handle profile form submit
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!name.trim() || !unit) {
+      setError("Please enter your name and select your unit.");
+      return;
+    }
+    try {
+      const ref = doc(db, "profiles", user!.uid);
+      await setDoc(ref, {
+        uid: user!.uid,
+        email: user!.email,
+        name,
+        unit,
+        isAdmin: false,
+        joinedAt: serverTimestamp(),
+        lastLogin: serverTimestamp(),
+      }, { merge: true });
+      setProfile({ uid: user!.uid, email: user!.email, name, unit, isAdmin: false });
+    } catch (err: any) {
+      setError("Failed to save profile.");
+    }
+  };
 
   if (loading) return <p>Loading...</p>;
   if (!user)
@@ -82,9 +156,96 @@ export default function Page() {
       </div>
     );
 
+  // Show profile form if profile doesn't exist
+  if (profileLoading) return <p>Loading profile...</p>;
+  if (user && !profile)
+    return (
+      <div
+        style={{
+          maxWidth: 400,
+          margin: "2rem auto",
+          padding: "2rem",
+          background: "#fff",
+          borderRadius: 12,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        }}
+      >
+        <h2 style={{ textAlign: "center", marginBottom: "1rem" }}>Complete Your Profile</h2>
+        <form onSubmit={handleProfileSubmit}>
+          <div style={{ marginBottom: "1rem" }}>
+            <label>
+              Name<br />
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                  marginTop: "0.25rem",
+                }}
+                required
+              />
+            </label>
+          </div>
+          <div style={{ marginBottom: "1rem" }}>
+            <label>
+              Unit<br />
+              <select
+                value={unit}
+                onChange={e => setUnit(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                  marginTop: "0.25rem",
+                }}
+                required
+              >
+                <option value="">Select your unit</option>
+                {UNIT_OPTIONS.map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+          {error && <div style={{ color: "red", marginBottom: "1rem" }}>{error}</div>}
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              borderRadius: "6px",
+              border: "none",
+              background: "#4caf50",
+              color: "#fff",
+              fontWeight: "bold",
+              fontSize: "1rem",
+              cursor: "pointer",
+            }}
+          >
+            Save Profile
+          </button>
+        </form>
+      </div>
+    );
+
   return (
     <div>
-      <div style={{ textAlign: "right", margin: "1rem 0" }}>
+      <div style={{ textAlign: "right", margin: "1rem 0", display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
+        {profile?.isAdmin && (
+          <Link href="/Admin">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-md"
+              style={{ marginLeft: "0.5rem" }}
+            >
+              Admin
+            </button>
+          </Link>
+        )}
         <button
           onClick={() => signOut(auth)}
           className="px-4 py-2 bg-gray-600 text-white rounded-md"
