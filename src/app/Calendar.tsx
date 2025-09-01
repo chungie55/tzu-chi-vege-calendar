@@ -224,6 +224,10 @@ function MonthGrid({
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
+  // Get today's date string in the same format as dateStr
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+
   return (
     <div className="month-grid" style={{ flex: 1, minWidth: 0 }}>
       <h2>{name}</h2>
@@ -239,12 +243,14 @@ function MonthGrid({
         {days.map((day) => {
           const dateStr = `${year}-${month + 1}-${day}`;
           const isMarked = markedDates.includes(dateStr);
+          const isToday = dateStr === todayStr;
 
           return (
             <button
               key={dateStr}
-              className={`day-circle ${isMarked ? "marked" : ""}`}
+              className={`day-circle${isMarked ? " marked" : ""}${isToday ? " today" : ""}`}
               onClick={() => onToggle(dateStr)}
+              style={isToday ? { border: "2px solid red" } : undefined}
             >
               {day}
             </button>

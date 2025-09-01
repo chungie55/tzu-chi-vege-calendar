@@ -268,6 +268,9 @@ p {
   background: #4caf50;
   color: white;
 }
+.day-circle.today {
+  border: 2px solid #4caf50;
+}
 
 /* ===== Count down flip card ===== */
 .flip-card {
