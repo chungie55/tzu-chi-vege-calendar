@@ -13,8 +13,36 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        {children}
+      <body style={{ margin: 0, padding: 0 }}>
+        <div
+          style={{
+            width: "100%",
+            textAlign: "center",
+            marginBottom: "2rem",
+          }}
+        >
+          <img
+            src="/banner.jpg"
+            alt="Vegetarian Challenge Banner"
+            style={{
+              maxWidth: "800px",
+              width: "100%",
+              height: "auto",
+              display: "block",
+              margin: "0 auto",
+              borderRadius: "12px",
+            }}
+          />
+        </div>
+        <div
+          style={{
+            maxWidth: "800px",
+            margin: "0 auto",
+            padding: "0 1rem",
+          }}
+        >
+          {children}
+        </div>
       </body>
     </html>
   );

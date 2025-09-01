@@ -13,12 +13,27 @@ const months = [
   { name: "December", year: 2025, month: 11 },
 ];
 
+const BANNER_MAX_WIDTH = 800; // px
+
 export default function Calendar() {
   const [user] = useAuthState(auth);
   const [markedDates, setMarkedDates] = useState<string[]>([]);
   const totalDays = 108;
-
   const [daysLeft, setDaysLeft] = useState<number>(0);
+
+  // Responsive: months per row
+  const [monthsPerRow, setMonthsPerRow] = useState(2);
+
+  useEffect(() => {
+    function handleResize() {
+      const width = Math.min(window.innerWidth, BANNER_MAX_WIDTH);
+      // If width < 600px, show 1 month per row, else 2
+      setMonthsPerRow(width < 600 ? 1 : 2);
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Load user data
   useEffect(() => {
@@ -45,7 +60,6 @@ export default function Calendar() {
     return () => clearInterval(timer);
   }, []);
 
-
   const toggleDate = async (date: string) => {
     if (!user) return;
 
@@ -61,10 +75,20 @@ export default function Calendar() {
 
   const progressPercent = Math.min((markedDates.length / totalDays) * 100, 100);
 
-  return (
-    <div className="calendar-wrapper">
-      <h1>Vegetarian Calendar (Sept – Dec 2025)</h1>
+  // Split months into rows
+  const rows: Array<typeof months> = [];
+  for (let i = 0; i < months.length; i += monthsPerRow) {
+    rows.push(months.slice(i, i + monthsPerRow));
+  }
 
+  return (
+    <div
+      className="calendar-wrapper"
+      style={{
+        maxWidth: BANNER_MAX_WIDTH,
+        margin: "0 auto",
+      }}
+    >
       {/* Progress Bar */}
       <div className="progress-wrapper">
         <div className="progress-label">
@@ -78,32 +102,30 @@ export default function Calendar() {
       {/* Countdown */}
       <div className="countdown">{daysLeft} days left until 26 Dec 2025</div>
 
-      {/* First row: Sept | Oct | Nov */}
-      <div className="months-row">
-        {months.slice(0, 3).map((m) => (
-          <MonthGrid
-            key={m.name}
-            month={m.month}
-            year={m.year}
-            name={m.name}
-            markedDates={markedDates}
-            onToggle={toggleDate}
-          />
-        ))}
-      </div>
-
-      {/* Second row: December aligned under Sept */}
-      <div className="months-row second-row">
-        <MonthGrid
-          month={months[3].month}
-          year={months[3].year}
-          name={months[3].name}
-          markedDates={markedDates}
-          onToggle={toggleDate}
-        />
-        <div className="month-placeholder"></div>
-        <div className="month-placeholder"></div>
-      </div>
+      {/* Dynamic month rows */}
+      {rows.map((row, idx) => (
+        <div
+          className="months-row"
+          key={idx}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          {row.map((m) => (
+            <MonthGrid
+              key={m.name}
+              month={m.month}
+              year={m.year}
+              name={m.name}
+              markedDates={markedDates}
+              onToggle={toggleDate}
+            />
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
@@ -128,7 +150,7 @@ function MonthGrid({
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   return (
-    <div className="month-grid">
+    <div className="month-grid" style={{ flex: 1, minWidth: 0 }}>
       <h2>{name}</h2>
       <div className="weekdays">
         <div>Sun</div><div>Mon</div><div>Tue</div>
