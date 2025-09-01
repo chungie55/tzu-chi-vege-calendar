@@ -1,17 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
 import { db, auth } from "../../lib/firebaseClient";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, Timestamp } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import Link from "next/link";
 
-type Profile = {
+// Define a proper type for user profiles
+interface Profile {
+  email?: string;
+  joinedAt?: Timestamp;
+  name?: string;
   uid: string;
-  name: string;
-  email: string;
-  unit: string;
-  isAdmin: boolean;
-};
+  unit?: string;
+  lastLogin?: Timestamp;
+  isAdmin?: boolean;
+}
 
 export default function Admin() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -43,19 +46,24 @@ export default function Admin() {
 
   // Sorting logic
   const sortedProfiles = [...profiles].sort((a, b) => {
-    let aVal: any, bVal: any;
-    if (sortKey === "markedCount") {
-      aVal = markedCounts[a.uid] || 0;
-      bVal = markedCounts[b.uid] || 0;
-    } else {
-      aVal = a[sortKey] || "";
-      bVal = b[sortKey] || "";
-    }
-    if (typeof aVal === "string" && typeof bVal === "string") {
-      return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-    }
-    return sortAsc ? aVal - bVal : bVal - aVal;
-  });
+  let aVal: string | number = "";
+  let bVal: string | number = "";
+
+  if (sortKey === "markedCount") {
+    aVal = markedCounts[a.uid] ?? 0;
+    bVal = markedCounts[b.uid] ?? 0;
+  } else {
+    // ✅ Safe because sortKey is keyof Profile
+    aVal = (a[sortKey] as string | number | undefined) ?? "";
+    bVal = (b[sortKey] as string | number | undefined) ?? "";
+  }
+
+  if (typeof aVal === "string" && typeof bVal === "string") {
+    return sortAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+  }
+
+  return sortAsc ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
+  }); 
 
   const handleSort = (key: keyof Profile | "markedCount") => {
     if (sortKey === key) {

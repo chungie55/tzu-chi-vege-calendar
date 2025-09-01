@@ -4,7 +4,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../lib/firebaseClient";
 import Calendar from "./Calendar";
 import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot, Timestamp } from "firebase/firestore";
 import { db } from "../lib/firebaseClient";
 import Link from "next/link";
 
@@ -15,9 +15,20 @@ const UNIT_OPTIONS = [
   "护经藏团队",
 ];
 
+// Define a proper type for user profiles
+interface Profile {
+  email?: string | null;
+  joinedAt?: Timestamp;
+  name?: string;
+  uid?: string;
+  unit?: string;
+  lastLogin?: Timestamp;
+  isAdmin?: boolean;
+}
+
 export default function Page() {
   const [user, loading] = useAuthState(auth);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("");
@@ -76,7 +87,7 @@ export default function Page() {
         lastLogin: serverTimestamp(),
       }, { merge: true });
       setProfile({ uid: user!.uid, email: user!.email, name, unit, isAdmin: false });
-    } catch (err: any) {
+    } catch {
       setError("Failed to save profile.");
     }
   };
