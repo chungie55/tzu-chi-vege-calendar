@@ -81,6 +81,20 @@ export default function Calendar() {
     rows.push(months.slice(i, i + monthsPerRow));
   }
 
+  // Flip animation state
+  const [flipped, setFlipped] = useState(false);
+  const [prevDaysLeft, setPrevDaysLeft] = useState(daysLeft);
+
+  useEffect(() => {
+    if (daysLeft !== prevDaysLeft) {
+      setFlipped(true);
+      setTimeout(() => {
+        setFlipped(false);
+        setPrevDaysLeft(daysLeft);
+      }, 600);
+    }
+  }, [daysLeft, prevDaysLeft]);
+
   return (
     <div
       className="calendar-wrapper"
@@ -91,16 +105,22 @@ export default function Calendar() {
     >
       {/* Progress Bar */}
       <div className="progress-wrapper">
-        <div className="progress-label">
-          {markedDates.length} / {totalDays} days completed
-        </div>
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
         </div>
+        <div className="progress-label">
+          {markedDates.length} / {totalDays} days completed
+        </div>        
       </div>
 
-      {/* Countdown */}
-      <div className="countdown">{daysLeft} days left until 26 Dec 2025</div>
+      {/* Flip Card Countdown */}
+      <div className={`flip-card${flipped ? " flipped" : ""}`}>
+        <div className="flip-card-inner">
+          <div className="flip-card-front">{prevDaysLeft}</div>
+          <div className="flip-card-back">{daysLeft}</div>
+        </div>
+      </div>
+    <div className="flip-label">Days left until 26 Dec 2025</div>
 
       {/* Dynamic month rows */}
       {rows.map((row, idx) => (
