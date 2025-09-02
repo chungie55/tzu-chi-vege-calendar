@@ -271,6 +271,14 @@ p {
 .day-circle.today {
   border: 2px solid #4caf50;
 }
+.day-circle.future {
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
 
 /* ===== Count down flip card ===== */
 .flip-card {

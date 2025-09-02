@@ -261,34 +261,19 @@ function MonthGrid({
           today.setHours(23, 59, 59, 999); // Set to end of today to allow same-day checkins
           const isFuture = dateToCheck > today;
 
-          return (
+          return isFuture ? (
+            <div
+              key={dateStr}
+              className={`day-circle future`}
+            >
+              {day}
+            </div>
+          ) : (
             <button
               key={dateStr}
-              className={`day-circle${isMarked ? " marked" : ""}${isToday ? " today" : ""}${isFuture ? " future" : ""}`}
-              onClick={(e) => {
-                if (isFuture) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  return;
-                }
-                onToggle(dateStr);
-              }}
-              onTouchStart={(e) => {
-                if (isFuture) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }
-              }}
-              style={{
-                ...(isToday ? { border: "2px solid red" } : {}),
-                ...(isFuture ? { 
-                  opacity: 0.5, 
-                  cursor: "not-allowed",
-                  backgroundColor: "#f0f0f0",
-                  pointerEvents: "none"
-                } : {})
-              }}
-              disabled={isFuture}
+              className={`day-circle${isMarked ? " marked" : ""}${isToday ? " today" : ""}`}
+              onClick={() => onToggle(dateStr)}
+              style={isToday ? { border: "2px solid red" } : {}}
             >
               {day}
             </button>
