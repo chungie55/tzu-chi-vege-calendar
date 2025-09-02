@@ -72,6 +72,16 @@ export default function Calendar() {
 
   const toggleDate = async (date: string) => {
     if (!user) return;
+    
+    // Check if the date is in the future
+    const dateToCheck = new Date(date);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // Set to end of today to allow same-day checkins
+    
+    if (dateToCheck > today) {
+      return; // Disable checkins for future dates
+    }
+    
     const updated = markedDates.includes(date)
       ? markedDates.filter((d) => d !== date)
       : [...markedDates, date];
@@ -244,13 +254,27 @@ function MonthGrid({
           const dateStr = `${year}-${month + 1}-${day}`;
           const isMarked = markedDates.includes(dateStr);
           const isToday = dateStr === todayStr;
+          
+          // Check if the date is in the future
+          const dateToCheck = new Date(dateStr);
+          const today = new Date();
+          today.setHours(23, 59, 59, 999); // Set to end of today to allow same-day checkins
+          const isFuture = dateToCheck > today;
 
           return (
             <button
               key={dateStr}
-              className={`day-circle${isMarked ? " marked" : ""}${isToday ? " today" : ""}`}
-              onClick={() => onToggle(dateStr)}
-              style={isToday ? { border: "2px solid red" } : undefined}
+              className={`day-circle${isMarked ? " marked" : ""}${isToday ? " today" : ""}${isFuture ? " future" : ""}`}
+              onClick={() => !isFuture && onToggle(dateStr)}
+              style={{
+                ...(isToday ? { border: "2px solid red" } : {}),
+                ...(isFuture ? { 
+                  opacity: 0.5, 
+                  cursor: "not-allowed",
+                  backgroundColor: "#f0f0f0"
+                } : {})
+              }}
+              disabled={isFuture}
             >
               {day}
             </button>
