@@ -265,13 +265,27 @@ function MonthGrid({
             <button
               key={dateStr}
               className={`day-circle${isMarked ? " marked" : ""}${isToday ? " today" : ""}${isFuture ? " future" : ""}`}
-              onClick={() => !isFuture && onToggle(dateStr)}
+              onClick={(e) => {
+                if (isFuture) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return;
+                }
+                onToggle(dateStr);
+              }}
+              onTouchStart={(e) => {
+                if (isFuture) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+              }}
               style={{
                 ...(isToday ? { border: "2px solid red" } : {}),
                 ...(isFuture ? { 
                   opacity: 0.5, 
                   cursor: "not-allowed",
-                  backgroundColor: "#f0f0f0"
+                  backgroundColor: "#f0f0f0",
+                  pointerEvents: "none"
                 } : {})
               }}
               disabled={isFuture}
