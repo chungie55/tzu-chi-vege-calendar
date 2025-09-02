@@ -215,6 +215,19 @@ export default function Calendar() {
   );
 }
 
+function isPastOrToday(year: number, month: number, day: number) {
+  // Target date
+  const target = new Date(year, month, day);
+  const targetStr = target.toISOString().split("T")[0]; // YYYY-MM-DD
+
+  // Today (local Singapore time)
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayStr = today.toISOString().split("T")[0];
+
+  return targetStr <= todayStr;
+}
+
 function MonthGrid({
   name,
   year,
@@ -256,10 +269,7 @@ function MonthGrid({
           const isToday = dateStr === todayStr;
           
           // Check if the date is in the future
-          const dateToCheck = new Date(dateStr);
-          const today = new Date();
-          today.setHours(23, 59, 59, 999); // Set to end of today to allow same-day checkins
-          const isFuture = dateToCheck > today;
+          const isFuture = !isPastOrToday(year, month, day);
 
           return isFuture ? (
             <button
