@@ -262,12 +262,12 @@ function MonthGrid({
           const isFuture = dateToCheck > today;
 
           return isFuture ? (
-            <div
+            <button
               key={dateStr}
               className={`day-circle future`}
             >
               {day}
-            </div>
+            </button>
           ) : (
             <button
               key={dateStr}
