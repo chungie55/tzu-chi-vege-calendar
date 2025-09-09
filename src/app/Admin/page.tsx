@@ -44,7 +44,9 @@ export default function Admin() {
             const snap = await getDocs(collection(db, "profiles"));
             const data: Profile[] = [];
             snap.forEach(doc => {
-              data.push(doc.data() as Profile);
+              if (doc.data().email && doc.data().email !== "jcyeoh@gmail.com") {
+                data.push(doc.data() as Profile);
+              }
             });
             setProfiles(data);
 
@@ -121,6 +123,7 @@ export default function Admin() {
         </button>
       </div>
       <h2 style={{ textAlign: "center", marginBottom: "2rem" }}>Overall Progress Report</h2>
+      <p style={{ textAlign: "right", marginBottom: "2rem" }}>Total Users: {profiles.length}</p>
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
